@@ -16,17 +16,17 @@
           <tbody>
             <!-- because cart here is an object of set key: value, not an array,
             so in the v-for, the first parameter is the value, the second parameter is key, and the lst parameter is running number -->
-            <tr v-for="(quantity, key, i) in cart"
+            <tr v-for="(cartItem, i) in cart"
                 v-bind:key="i">
               <td>
-                <i :class="itemIcon(key)"></i>
+                <i :class="itemIcon(cartItem.name)"></i>
             </td>
-              <td>{{key}}</td>
-              <td>${{ getPrice(key) }}</td>
-              <td class="center">{{quantity}}</td>
-              <td>${{ getPrice(key) * quantity }}</td>
+              <td>{{cartItem.name}}</td>
+              <td>${{ getPrice(cartItem.name) }}</td>
+              <td class="center">{{cartItem.quantity}}</td>
+              <td>${{ getPrice(cartItem.name) * cartItem.quantity }}</td>
               <td class="center">
-                <button class="btn btn-light cart-remove" v-on:click="remove_cart_item(key)">
+                <button class="btn btn-light cart-remove" v-on:click="removeCartItem(cartItem.name)">
                       &times;
                 </button>
               </td>
@@ -36,40 +36,44 @@
     </main>
 </template>
 
-<script>
-export default {
-  name: 'PastOrderView',
-  data () {
-    return {
-      icon: 'raddish'
-    }
-  },
-  props: ['cart', 'inventory', 'remove_cart_item'],
-  methods: {
-    getPrice (name) {
-      const prod = this.inventory.find((p) => p.name === name)
-      return prod.price.USD
-    },
-    itemIcon (name) {
-      const prod = this.inventory.find((p) => p.name === name)
-      var iconClass = 'icofont-3x icofont-' + prod.icon
-      console.log(prod.icon)
-      return iconClass
-    },
-    calculateTotal () {
-      // const names = Object.keys(this.cart)
-      // const total = Object.values(this.cart).reduce((acc, curr, index) => {
-      //   return acc + (curr * this.getPrice(names[index]))
-      // }, 0)
+<script lang="ts">
+import { Options, Vue } from 'vue-class-component'
+import { Component, Prop } from 'vue-property-decorator'
+import { Product, Cart } from '@/types'
 
-      // each time looping through curr = [key, value]
-      const total = Object.entries(this.cart).reduce((acc, curr, index) => {
+@Options({
+  name: 'PastOrderView',
+  components: {
+  }
+})
+
+export default class PastOrders extends Vue {
+    @Prop({ Object }) readonly cart!: Cart[]
+    @Prop({ Object }) readonly inventory!: Product[]
+    @Prop({ type: Function }) readonly removeCartItem!: (itemName: string) => void | undefined
+
+    getPrice (itemKey: string): number {
+      const prod = this.inventory.find((p) => p.name === itemKey)
+
+      if (!prod) return 0
+      return prod.price.USD
+    }
+
+    itemIcon (itemKey: string) {
+      const prod = this.inventory.find((p) => p.name === itemKey)
+      if (!prod) return 'icofont-carrot'
+
+      var iconClass = 'icofont-' + prod.icon
+      return iconClass
+    }
+
+    calculateTotal (): string {
+      const total = this.cart.reduce((acc, curr, index) => {
         console.log(curr)
-        return acc + curr[1] * this.getPrice(curr[0])
+        return acc + curr.quantity * this.getPrice(curr.name)
       }, 0)
 
       return total.toFixed(2)
     }
-  }
 }
 </script>

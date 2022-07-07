@@ -1,4 +1,4 @@
-# product-and-cart
+# vuex-ts-product-cart-demo
 
 ## Project setup
 ```

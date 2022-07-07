@@ -38,20 +38,20 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { Options, Vue } from 'vue-class-component'
+import { Component, Prop } from 'vue-property-decorator'
+import { Product } from '@/types'
 
-export default ({
-  data () {
-    return {
-      quantity: 0 // Unexpected mutation of "product" prop  <-- warning
-    }
-  },
-  props: ['product', 'index', 'addToCart'],
-  methods: {
-    itemIcon (iconName) {
-      var iconClass = 'icofont-10x icofont-' + iconName
-      return iconClass
-    }
+export default class ProductCard extends Vue {
+  public quantity = 0
+  @Prop(Object) readonly product!: Product
+  @Prop({ type: Function }) readonly addToCart!: (itemName: string, quantity: number) => void | undefined
+  @Prop(Number) readonly index: number | undefined
+
+  itemIcon (iconName: string) {
+    var iconClass = 'icofont-10x icofont-' + iconName
+    return iconClass
   }
-})
+}
 </script>

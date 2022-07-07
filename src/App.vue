@@ -14,69 +14,72 @@
     </nav>
     <div v-on:click="toggleSidebar" class="top-bar-cart-link">
       <i class="icofont-cart-alt icofont-1x"></i>
-      <span>Cart ({{ totalQuantity }})</span>
+      <span>Cart ({{ totalQuantity() }})</span>
     </div>
   </header>
 
-  <router-view v-bind:inventory="inventory" :addToCart="addToCart"  v-bind:cart="cart" :remove_cart_item="removeItem"/>
+  <router-view v-bind:inventory="inventory" :addToCart="addToCart"  v-bind:cart="cart" :removeCartItem="removeItem" />
 
   <SideBar
     v-if="showSidebar"
     v-bind:toggle="toggleSidebar"
     v-bind:cart="cart"
     :inventory="inventory"
-    :remove_cart_item="removeItem"
+    :removeCartItem="removeItem"
   />
 </template>
 
-<script>
+<script lang="ts">
 // @ is an alias to /src
+import { Options, Vue } from 'vue-class-component'
+import { Product, Cart } from '@/types'
 import SideBar from '@/components/SideBar.vue'
 import food from './food.json'
 
-export default ({
+enum FoodType {
+  vegetable,
+  fruit,
+  meat
+}
+
+@Options({
   components: {
     SideBar
-  },
-  data () {
-    return {
-      showSidebar: false,
-      inventory: food,
-      cart: {}
-    }
-  },
-  computed: {
-    totalQuantity: {
-      get () {
-        if (!Object.keys(this.cart).length) return 0
-        return Object.values(this.cart).reduce((acc, curr, index) => {
-          return acc + curr
-        }, 0)
-      }
-    }
-    // totalQuantity() {
-    //   if (!Object.keys(this.cart).length) return 0
-    //   return Object.values(this.cart).reduce((acc, curr, index) => {
-    //     return acc + curr
-    //   }, 0)
-    // }
-  },
-  methods: {
-    addToCart (name, quantity) {
-      // console.log(name, index)
-      // if (!this.cart[name]) this.cart[name] = 0
-      // this.cart[name] += this.inventory[index].quantity
-      // this.inventory[index].quantity = 0
-      // console.log(this.cart)
-      if (!this.cart[name]) this.cart[name] = 0
-      this.cart[name] += quantity
-    },
-    toggleSidebar () {
-      this.showSidebar = !this.showSidebar
-    },
-    removeItem (name) {
-      delete this.cart[name]
-    }
   }
 })
+
+export default class App extends Vue {
+  inventory: Product[] = food
+  cart: Cart[] = []
+  showSidebar = false
+
+  addToCart (itemName: string, quantity: number): void {
+    const myCart = this.cart.find((p) => p.name === itemName)
+    if (!myCart) {
+      this.cart.push({
+        name: itemName,
+        quantity: quantity
+      })
+    } else {
+      myCart.quantity += quantity
+    }
+  }
+
+  toggleSidebar (): void {
+    this.showSidebar = !this.showSidebar
+  }
+
+  removeItem (itemName: string): void {
+    const myCart = this.cart.find((p) => p.name === itemName)
+    if (!myCart) return
+    this.cart.splice(this.cart.indexOf(myCart), 1)
+  }
+
+  totalQuantity (): number {
+    if (!this.cart.length) return 0
+    return this.cart.reduce((acc, curr, index) => {
+      return acc + curr.quantity
+    }, 0)
+  }
+}
 </script>

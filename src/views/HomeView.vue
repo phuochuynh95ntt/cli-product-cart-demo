@@ -12,7 +12,7 @@
 
         <div class="recommended">
           <ProductCart
-            v-for="(product, index) in inventory.slice(0, 3)"
+            v-for="(product, index) in inventory!.slice(0, 3)"
             v-bind:key="product.id"
             class="card"
             v-bind:index="index"
@@ -25,16 +25,20 @@
   </div>
 </template>
 
-<script>
-
-// @ is an alias to /src
+<script lang="ts">
+import { Options, Vue } from 'vue-class-component'
+import { Component, Prop } from 'vue-property-decorator'
 import ProductCart from '@/components/ProductCart.vue'
+import { Product } from '@/types'
 
-export default ({
-  name: 'HomeView',
-  props: ['inventory', 'addToCart'],
+@Options({
   components: {
     ProductCart
   }
 })
+
+export default class HomeView extends Vue {
+  @Prop(Object) readonly inventory: Product[] | undefined
+  @Prop({ type: Function }) readonly addToCart!: (itemName: string, quantity: number) => void | undefined
+}
 </script>

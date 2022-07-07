@@ -15,14 +15,21 @@
   </main>
 </template>
 
-<script>
+<script lang="ts">
+import { Options, Vue } from 'vue-class-component'
+import { Component, Prop } from 'vue-property-decorator'
 import ProductCart from '@/components/ProductCart.vue'
+import { Product } from '@/types'
 
-export default ({
-  name: 'ProductView',
-  props: ['inventory', 'addToCart'],
+@Options({
+  name: 'ProductsView',
   components: {
     ProductCart
   }
 })
+
+export default class ProductsView extends Vue {
+  @Prop(Object) readonly inventory: Product[] | undefined
+  @Prop({ type: Function }) readonly addToCart!: (itemName: string, quantity: number) => void | undefined
+}
 </script>
