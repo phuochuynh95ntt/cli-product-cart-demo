@@ -18,23 +18,18 @@
     </div>
   </header>
 
-  <router-view v-bind:inventory="inventory" :addToCart="addToCart"  v-bind:cart="cart" :removeCartItem="removeItem" />
+  <router-view />
 
   <SideBar
     v-if="showSidebar"
     v-bind:toggle="toggleSidebar"
-    v-bind:cart="cart"
-    :inventory="inventory"
-    :removeCartItem="removeItem"
   />
 </template>
 
 <script lang="ts">
 // @ is an alias to /src
 import { Options, Vue } from 'vue-class-component'
-import { Product, Cart } from '@/types'
 import SideBar from '@/components/SideBar.vue'
-import food from './food.json'
 
 enum FoodType {
   vegetable,
@@ -49,37 +44,14 @@ enum FoodType {
 })
 
 export default class App extends Vue {
-  inventory: Product[] = food
-  cart: Cart[] = []
   showSidebar = false
-
-  addToCart (itemName: string, quantity: number): void {
-    const myCart = this.cart.find((p) => p.name === itemName)
-    if (!myCart) {
-      this.cart.push({
-        name: itemName,
-        quantity: quantity
-      })
-    } else {
-      myCart.quantity += quantity
-    }
-  }
 
   toggleSidebar (): void {
     this.showSidebar = !this.showSidebar
   }
 
-  removeItem (itemName: string): void {
-    const myCart = this.cart.find((p) => p.name === itemName)
-    if (!myCart) return
-    this.cart.splice(this.cart.indexOf(myCart), 1)
-  }
-
   totalQuantity (): number {
-    if (!this.cart.length) return 0
-    return this.cart.reduce((acc, curr, index) => {
-      return acc + curr.quantity
-    }, 0)
+    return this.$store.getters.getTotalQuantityInCart
   }
 }
 </script>

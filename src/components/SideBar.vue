@@ -22,14 +22,14 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="(cartItem, i) in cart" :key="i">
+                        <tr v-for="(cartItem, i) in $store.state.cart" :key="i">
                             <td><i :class="itemIcon(cartItem.name)" class="icofont-3x"></i></td>
                             <td>{{ cartItem.name }}</td>
-                            <td>${{ getPrice(cartItem.name) }}</td>
+                            <td>${{ $store.getters.getPrice(cartItem.name) }}</td>
                             <td class="center">{{ cartItem.quantity }}</td>
-                            <td>${{ getPrice(cartItem.name) * cartItem.quantity }}</td>
+                            <td>${{ calculateLineTotal(cartItem) }}</td>
                             <td class="center">
-                                <button @click="removeCartItem(cartItem.name)" class="btn btn-light cart-remove">
+                                <button @click="$store.dispatch('HandleRemoveCart', cartItem.name)" class="btn btn-light cart-remove">
                                     &times;
                                 </button>
                             </td>
@@ -37,12 +37,11 @@
                     </tbody>
                 </table>
 
-                <p class="center" v-if="!Object.keys(cart).length">
+                <p class="center" v-if="!$store.state.cart.length">
                     <em>No items in cart</em>
                 </p>
                 <div class="spread">
-                    <!-- <span><strong>Total:</strong> \${{ cartTotal }} </span> equivalent to the below line-->
-                    <span><strong>Total:</strong> ${{ calculateTotal() }} </span>
+                    <span><strong>Total:</strong> ${{ $store.getters.getTotalAmount.toFixed(2) }} </span>
                     <button class="btn btn-light">Checkout</button>
                 </div>
             </div>
@@ -52,8 +51,8 @@
 
 <script lang="ts" >
 import { Options, Vue } from 'vue-class-component'
-import { Component, Prop } from 'vue-property-decorator'
-import { Product, Cart } from '@/types'
+import { Prop } from 'vue-property-decorator'
+import { Cart } from '@/types'
 
 @Options({
   name: 'SideBar'
@@ -61,33 +60,13 @@ import { Product, Cart } from '@/types'
 
 export default class SideBar extends Vue {
     @Prop({ type: Function }) readonly toggle!: () => void | undefined
-    @Prop({ Object }) readonly cart!: Cart[]
-    @Prop({ Object }) readonly inventory!: Product[]
-    @Prop({ type: Function }) readonly removeCartItem!: (itemName: string) => void | undefined
-    @Prop(Number) readonly index: number | undefined
 
-    calculateTotal (): string {
-      const total = this.cart.reduce((acc, curr, index) => {
-        console.log(curr)
-        return acc + curr.quantity * this.getPrice(curr.name)
-      }, 0)
-
-      return total.toFixed(2)
+    calculateLineTotal (cartItem: Cart): string {
+      return (this.$store.getters.getPrice(cartItem.name) * cartItem.quantity).toFixed(2)
     }
 
-    getPrice (itemKey: string): number {
-      const prod = this.inventory.find((p) => p.name === itemKey)
-
-      if (!prod) return 0
-      return prod.price.USD
-    }
-
-    itemIcon (itemKey: string) {
-      const prod = this.inventory.find((p) => p.name === itemKey)
-      if (!prod) return 'icofont-carrot'
-
-      var iconClass = 'icofont-' + prod.icon
-      return iconClass
+    itemIcon (itemKey: string): string {
+      return this.$store.getters.getItemIcon(itemKey)
     }
 }
 </script>

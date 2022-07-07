@@ -2,7 +2,7 @@
 
 ## Project setup
 ```
-npm install
+npm install [--legacy-peer-deps]
 npm install -D sass-loader@^10 sass --legacy-peer-deps
 ```
 

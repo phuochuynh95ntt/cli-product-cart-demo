@@ -39,19 +39,27 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component'
-import { Component, Prop } from 'vue-property-decorator'
-import { Product } from '@/types'
+import { Vue } from 'vue-class-component'
+import { Prop } from 'vue-property-decorator'
+import { Cart, Product } from '@/types'
 
 export default class ProductCard extends Vue {
   public quantity = 0
   @Prop(Object) readonly product!: Product
-  @Prop({ type: Function }) readonly addToCart!: (itemName: string, quantity: number) => void | undefined
   @Prop(Number) readonly index: number | undefined
 
   itemIcon (iconName: string) {
-    var iconClass = 'icofont-10x icofont-' + iconName
+    const iconClass = 'icofont-10x icofont-' + iconName
     return iconClass
+  }
+
+  addToCart (itemKey:string, quantity: number): void {
+    const newCart: Cart = {
+      name: itemKey,
+      quantity: quantity
+    }
+
+    this.$store.dispatch('HandleUpdateCart', newCart)
   }
 }
 </script>
